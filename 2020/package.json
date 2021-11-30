@@ -1,0 +1,9 @@
+{
+  "name": "advent-of-code-2020",
+  "version": "1.0.0",
+  "description": "Advent of Code 2020 (https://adventofcode.com/2020/)",
+  "main": "index.js",
+  "repository": "https://github.com/mfloryan/advent-of-code",
+  "author": "Marcin Floryan",
+  "license": "MIT"
+}
