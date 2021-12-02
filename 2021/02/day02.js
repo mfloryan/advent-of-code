@@ -1,5 +1,6 @@
 const fs = require('fs')
 const path = require('path')
+const { readLines } = require('../input')
 
 let input = `forward 5
 down 5
@@ -9,8 +10,8 @@ down 8
 forward 2`
 
 let lines = input.split('\n')
-let fileInput = fs.readFileSync(path.join(__dirname, 'input.txt'), { encoding: 'utf8' })
-lines = fileInput.split('\n')
+
+lines = readLines('02/input.txt')
 
 let interpreter1 = {
     'forward': (state, magnitude) => { state.position += magnitude },

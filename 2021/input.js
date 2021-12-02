@@ -1,11 +1,16 @@
 const fs = require('fs')
 const path = require('path')
 
-function parseNumbers(inputString) {
-    return inputString.split('\n').map(x => Number.parseInt(x))
+function parseNumbers(inputLines) {
+    return inputLines.map(x => Number.parseInt(x))
+}
+
+function readLines(name = "input.txt") {
+    return fs.readFileSync(path.join(__dirname, name), { encoding: 'utf8' }).split('\n')
 }
 
 exports.loadNumbers = function(name = "input.txt") {
-    let fileInput =  fs.readFileSync(path.join(__dirname, name), { encoding: 'utf8' })
-    return parseNumbers(fileInput)
-}
+    return parseNumbers(readLines(name))
+    }
+
+exports.readLines = readLines
