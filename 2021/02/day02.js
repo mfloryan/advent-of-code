@@ -9,29 +9,40 @@ down 8
 forward 2`
 
 let lines = input.split('\n')
-let fileInput =  fs.readFileSync(path.join(__dirname, 'input.txt'), { encoding: 'utf8' })
-lines=fileInput.split('\n')
+let fileInput = fs.readFileSync(path.join(__dirname, 'input.txt'), { encoding: 'utf8' })
+lines = fileInput.split('\n')
 
-let position = 0, depth = 0, aim = 0
+let interpreter1 = {
+    'forward': (state, magnitude) => { state.position += magnitude },
+    'down': (state, magnitude) => { state.depth += magnitude },
+    'up': (state, magnitude) => { state.depth -= magnitude }
+}
 
-let parser2 = {
+let interpreter2 = {
     'forward': (state, magnitude) => { state.position += magnitude; state.depth += state.aim * magnitude },
     'down': (state, magnitude) => { state.aim += magnitude },
     'up': (state, magnitude) => { state.aim -= magnitude }
 }
 
-let state = {
-    position: 0,
-    depth: 0,
-    aim: 0
+function parseInstructions(line) {
+    let [move, magnitude] = line.split(" ")
+    return { move, magnitude: Number.parseInt(magnitude) }
 }
 
-lines.forEach(line => {
-    let [move, size] = line.split(" ")
-    size = Number.parseInt(size)
+function moveSubmarine(instructions, interpreter) {
+    return instructions
+        .map(parseInstructions)
+        .reduce((p, c) => {
+            interpreter[c.move](p, c.magnitude); return p
+        }, {
+            position: 0,
+            depth: 0,
+            aim: 0
+        })
+}
 
-    parser2[move](state, size)
-})
+let state = moveSubmarine(lines, interpreter1)
+console.log("Day 02 part 1:", state.position * state.depth)
 
-console.log(state.position, state.depth)
+state = moveSubmarine(lines, interpreter2)
 console.log("Day 02 part 2:", state.position * state.depth)
