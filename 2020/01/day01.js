@@ -1,5 +1,4 @@
 const {loadNumbers} = require('../input')
-const fs = require('fs')
 const assert = require('assert/strict')
 
 let sampleInput = `1721
