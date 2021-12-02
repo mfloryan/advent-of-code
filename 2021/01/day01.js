@@ -1,4 +1,5 @@
 const { loadNumbers } = require('../input')
+const assert = require('assert/strict')
 
 function countIncreases(numbers) {
     let increases  = 0
@@ -30,9 +31,9 @@ let textInput = `199
 263`
 
 let numbers = textInput.split('\n').map(x => Number.parseInt(x))
-console.log(countIncreases(numbers))
-console.log(countTripletIncreases(numbers))
+assert.equal(countIncreases(numbers), 7)
+assert.equal(countTripletIncreases(numbers), 5)
 
 numbers = loadNumbers("01/input.txt")
-console.log(countIncreases(numbers))
-console.log(countTripletIncreases(numbers))
+console.log("Day 01 part 1: ", countIncreases(numbers))
+console.log("Day 01 part 2: ", countTripletIncreases(numbers))
