@@ -8,7 +8,7 @@ let sampleInput =
 function parseLine(line) {
     let [policy, password] = line.split(":")
     let [minmax, letter] = policy.split(" ")
-    let [min, max] = policy.split("-").map(x => Number.parseInt(x))
+    let [min, max] = minmax.split("-").map(x => Number.parseInt(x))
     return [{ min, max, letter }, password.trim()]
 }
 
