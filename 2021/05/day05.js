@@ -17,7 +17,6 @@ function parseLine(line) {
     return {x1: coords[0][0], y1: coords[0][1], x2: coords[1][0], y2: coords[1][1]}
 }
 
-
 function createPlane(dim) {
     let plane = []
     for (let y = 0; y <= dim.y; y++) {
@@ -27,22 +26,15 @@ function createPlane(dim) {
 }
 
 function drawLine(plane, line, diagonal = false) {
-    if (line.x1 == line.x2) {
-        for (i = Math.min(line.y1, line.y2); i <= Math.max(line.y1, line.y2); i++ ){
-            plane[i][line.x1]++
-        }
-    } else if (line.y1 == line.y2) {
-        for (i = Math.min(line.x1, line.x2); i <= Math.max(line.x1, line.x2); i++ ){
-            plane[line.y1][i]++
-        }
-    } else {
-        if (diagonal) {
-            for (i = 0; i <= Math.abs(line.y2 - line.y1); i++){
-                let x = line.x1 > line.x2? line.x1 - i: line.x1+i
-                let y= line.y1 > line.y2? line.y1 - i: line.y1+i
-                plane[y][x]++
-            }
-        }
+    let dx = line.x2 - line.x1
+    let dy = line.y2 - line.y1
+
+    if (!diagonal && Math.abs(dx) == Math.abs(dy)) return
+
+    for (i = 0; i <= Math.abs(dx == 0?dy:dx); i++){
+        let x = line.x1 + i * Math.sign(dx)
+        let y = line.y1 + i * Math.sign(dy)
+        plane[y][x]++
     }
 }
 
@@ -50,13 +42,11 @@ let data = lines.map(parseLine)
 let dim = data.reduce((p,c) => { return {x: Math.max(p.x, c.x1, c.x2) , y: Math.max(p.y, c.y1, c.y2) } }, {x:0, y:0})
 
 let plane1 = createPlane(dim)
-let plane2 = createPlane(dim)
-
 data.forEach(line => drawLine(plane1, line))
-data.forEach(line => drawLine(plane2, line, true))
-
 let r1 = plane1.map(y => y.filter(p => p > 1).length).reduce((p,c) => (p+c), 0)
 console.log("Day 05 - part 1:", r1)
 
+let plane2 = createPlane(dim)
+data.forEach(line => drawLine(plane2, line, true))
 let r2 = plane2.map(y => y.filter(p => p > 1).length).reduce((p,c) => (p+c), 0)
 console.log("Day 05 - part 2:", r2)
