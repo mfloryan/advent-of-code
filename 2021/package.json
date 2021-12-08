@@ -5,5 +5,8 @@
   "main": "index.js",
   "repository": "https://github.com/mfloryan/advent-of-code",
   "author": "Marcin Floryan",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "lodash": "^4.17.21"
+  }
 }
