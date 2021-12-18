@@ -2,11 +2,10 @@
 const { loadLines } = require('../input')
 const assert = require('assert/strict')
 const { isArray } = require('lodash')
-const exp = require('constants')
 let lines = loadLines('18/input.txt')
 
 function smartSplit(line) {
-    let code = eval(line);
+    let code = JSON.parse(line);
 
     let result = ['[']
     function parse(code) {
@@ -31,17 +30,6 @@ function smartSplit(line) {
     return result
 }
 
-function canExplode(number) {
-    let parts = smartSplit(number)
-    let level = 0;
-    for (let i = 0; i < parts.length; i++) {
-        if (parts[i] == '[') level++
-        if (parts[i] == ']') level--
-        if (level == 5) return true
-    }
-    return false
-}
-
 function explode(line) {
     let newLine = []
     let parts = smartSplit(line)
@@ -55,8 +43,8 @@ function explode(line) {
 
         if (level == 5 && !exploded) {
             exploded = i;
-            explodedPair = [parts[i+1],parts[i+3]]
-            i+= 4;
+            explodedPair = [parts[i + 1], parts[i + 3]]
+            i += 4;
             part = 0
             level--;
         }
@@ -64,13 +52,13 @@ function explode(line) {
     }
 
     if (exploded) {
-        for (let i = exploded-1; i > 0; i--) {
+        for (let i = exploded - 1; i > 0; i--) {
             if (typeof newLine[i] === 'number') {
                 newLine[i] = newLine[i] + explodedPair[0];
                 break;
             }
         }
-        for (let i = exploded+1; i < newLine.length; i++) {
+        for (let i = exploded + 1; i < newLine.length; i++) {
             if (typeof newLine[i] === 'number') {
                 newLine[i] = newLine[i] + explodedPair[1];
                 break;
@@ -78,12 +66,7 @@ function explode(line) {
         }
     }
 
-    return [exploded != 0,  newLine.join('')]
-}
-
-function canSplit(number) {
-    let parts = smartSplit(number)
-    return parts.some(p => (typeof p === 'number' && p > 9))
+    return [exploded != 0, newLine.join('')]
 }
 
 function split(line) {
@@ -94,9 +77,9 @@ function split(line) {
         if (typeof parts[i] === 'number') {
             if (parts[i] > 9 && !hasSplit) {
                 newLine.push('[')
-                newLine.push(Math.floor(parts[i]/2))
+                newLine.push(Math.floor(parts[i] / 2))
                 newLine.push(',')
-                newLine.push(Math.ceil(parts[i]/2))
+                newLine.push(Math.ceil(parts[i] / 2))
                 newLine.push(']')
                 hasSplit = true
             } else {
@@ -106,24 +89,19 @@ function split(line) {
             newLine.push(parts[i])
         }
     }
-    return [hasSplit, newLine.join('') ]
+    return [hasSplit, newLine.join('')]
 }
 
 function add(n1, n2) {
-    return '['+n1+ ',' + n2 + ']'
+    return '[' + n1 + ',' + n2 + ']'
 }
 
 function reduce(n) {
     let r = [false, n]
     do {
-        if (canExplode(r[1])) {
-            r = explode(r[1])
-        }
-        else 
-        if (canSplit(r[1])) {
+        r = explode(r[1])
+        if (!r[0]) {
             r = split(r[1])
-        } else {
-            r[0] = false
         }
     } while (r[0])
     return r[1]
@@ -146,19 +124,19 @@ assert.equal(explode('[[3,[2,[1,[7,3]]]],[6,[5,[4,[3,2]]]]]')[1], '[[3,[2,[8,0]]
 assert.equal(explode('[[6,[5,[4,[3,2]]]],1]')[1], '[[6,[5,[7,0]]],3]')
 assert.equal(explode('[[3,[2,[8,0]]],[9,[5,[4,[3,2]]]]]')[1], '[[3,[2,[8,0]]],[9,[5,[7,0]]]]')
 
-assert.equal( split('[[[[0,7],4],[15,[0,13]]],[1,1]]')[1], '[[[[0,7],4],[[7,8],[0,13]]],[1,1]]')
-assert.equal( split('[[[[0,7],4],[[7,8],[0,13]]],[1,1]]')[1], '[[[[0,7],4],[[7,8],[0,[6,7]]]],[1,1]]')
-assert.equal( split('[[[[0,7],4],[[7,8],[0,[6,7]]]],[1,1]]')[1], '[[[[0,7],4],[[7,8],[0,[6,7]]]],[1,1]]')
+assert.equal(split('[[[[0,7],4],[15,[0,13]]],[1,1]]')[1], '[[[[0,7],4],[[7,8],[0,13]]],[1,1]]')
+assert.equal(split('[[[[0,7],4],[[7,8],[0,13]]],[1,1]]')[1], '[[[[0,7],4],[[7,8],[0,[6,7]]]],[1,1]]')
+assert.equal(split('[[[[0,7],4],[[7,8],[0,[6,7]]]],[1,1]]')[1], '[[[[0,7],4],[[7,8],[0,[6,7]]]],[1,1]]')
 
-assert.equal( add('[1,2]', '[[3,4],5]'), '[[1,2],[[3,4],5]]')
+assert.equal(add('[1,2]', '[[3,4],5]'), '[[1,2],[[3,4],5]]')
 
-assert.equal(addAndReduce('[[[[4,3],4],4],[7,[[8,4],9]]]','[1,1]'), '[[[[0,7],4],[[7,8],[6,0]]],[8,1]]')
+assert.equal(addAndReduce('[[[[4,3],4],4],[7,[[8,4],9]]]', '[1,1]'), '[[[[0,7],4],[[7,8],[6,0]]],[8,1]]')
 
 let list = `[1,1]
 [2,2]
 [3,3]
 [4,4]`.split('\n')
-assert.equal( list.reduce((p,c) => { if (p) { return addAndReduce(p,c)} else return c }), '[[[[1,1],[2,2]],[3,3]],[4,4]]')
+assert.equal(list.reduce((p, c) => { if (p) { return addAndReduce(p, c) } else return c }), '[[[[1,1],[2,2]],[3,3]],[4,4]]')
 
 list = `[1,1]
 [2,2]
@@ -166,7 +144,7 @@ list = `[1,1]
 [4,4]
 [5,5]`.split('\n')
 
-assert.equal( list.reduce((p,c) => { if (p) { return addAndReduce(p,c)} else return c }), '[[[[3,0],[5,3]],[4,4]],[5,5]]')
+assert.equal(list.reduce((p, c) => { if (p) { return addAndReduce(p, c) } else return c }), '[[[[3,0],[5,3]],[4,4]],[5,5]]')
 
 list = `[1,1]
 [2,2]
@@ -175,7 +153,7 @@ list = `[1,1]
 [5,5]
 [6,6]`.split('\n')
 
-assert.equal( list.reduce((p,c) => { if (p) { return addAndReduce(p,c)} else return c }), '[[[[5,0],[7,4]],[5,5]],[6,6]]')
+assert.equal(list.reduce((p, c) => { if (p) { return addAndReduce(p, c) } else return c }), '[[[[5,0],[7,4]],[5,5]],[6,6]]')
 
 list = `[[[0,[4,5]],[0,0]],[[[4,5],[2,6]],[9,5]]]
 [7,[[[3,7],[4,3]],[[6,3],[8,8]]]]
@@ -188,7 +166,7 @@ list = `[[[0,[4,5]],[0,0]],[[[4,5],[2,6]],[9,5]]]
 [[[5,[7,4]],7],1]
 [[[[4,2],2],6],[8,7]]`.split('\n')
 
-assert.equal(list.reduce((p,c) => { if (p) { return addAndReduce(p,c)} else return c }), '[[[[8,7],[7,7]],[[8,6],[7,7]]],[[[0,7],[6,6]],[8,7]]]')
+assert.equal(list.reduce((p, c) => { if (p) { return addAndReduce(p, c) } else return c }), '[[[[8,7],[7,7]],[[8,6],[7,7]]],[[[0,7],[6,6]],[8,7]]]')
 
 list = `[[[0,[5,8]],[[1,7],[9,6]]],[[4,[1,2]],[[1,4],2]]]
 [[[5,[2,8]],4],[5,[[9,9],0]]]
@@ -201,23 +179,23 @@ list = `[[[0,[5,8]],[[1,7],[9,6]]],[[4,[1,2]],[[1,4],2]]]
 [[2,[[7,7],7]],[[5,8],[[9,3],[0,2]]]]
 [[[[5,2],5],[8,[3,7]]],[[5,[7,5]],[4,4]]]`.split('\n')
 
-assert.equal(list.reduce((p,c) => { if (p) { return addAndReduce(p,c)} else return c }), '[[[[6,6],[7,6]],[[7,7],[7,0]]],[[[7,7],[7,7]],[[7,8],[9,9]]]]')
-assert.equal(calculateMagnitude([[[[6,6],[7,6]],[[7,7],[7,0]]],[[[7,7],[7,7]],[[7,8],[9,9]]]]),4140)
+assert.equal(list.reduce((p, c) => { if (p) { return addAndReduce(p, c) } else return c }), '[[[[6,6],[7,6]],[[7,7],[7,0]]],[[[7,7],[7,7]],[[7,8],[9,9]]]]')
+assert.equal(calculateMagnitude([[[[6, 6], [7, 6]], [[7, 7], [7, 0]]], [[[7, 7], [7, 7]], [[7, 8], [9, 9]]]]), 4140)
 
-assert.equal(calculateMagnitude([[1,2],[[3,4],5]]), 143)
-assert.equal(calculateMagnitude([[[[8,7],[7,7]],[[8,6],[7,7]]],[[[0,7],[6,6]],[8,7]]]), 3488)
+assert.equal(calculateMagnitude([[1, 2], [[3, 4], 5]]), 143)
+assert.equal(calculateMagnitude([[[[8, 7], [7, 7]], [[8, 6], [7, 7]]], [[[0, 7], [6, 6]], [8, 7]]]), 3488)
 
 console.log(calculateMagnitude(
-    eval(lines.reduce((p,c) => { if (p) { return addAndReduce(p,c)} else return c }))
+    JSON.parse(lines.reduce((p, c) => { if (p) { return addAndReduce(p, c) } else return c }))
 ))
 
 let pairs = []
 for (let i = 0; i < lines.length; i++) {
     for (let j = 0; j < lines.length; j++) {
-        pairs.push([i,j])
+        pairs.push([i, j])
     }
 }
 
-let linePairs = pairs.map( p => p.map(n => lines[n]))
-let r = linePairs.map(lp => calculateMagnitude(eval(addAndReduce(lp[0], lp[1])))).reduce((p,c) => Math.max(p,c), 0)
+let linePairs = pairs.map(p => p.map(n => lines[n]))
+let r = linePairs.map(lp => calculateMagnitude(JSON.parse(addAndReduce(lp[0], lp[1])))).reduce((p, c) => Math.max(p, c), 0)
 console.log(r)
