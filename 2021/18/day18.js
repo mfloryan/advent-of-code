@@ -210,3 +210,14 @@ assert.equal(calculateMagnitude([[[[8,7],[7,7]],[[8,6],[7,7]]],[[[0,7],[6,6]],[8
 console.log(calculateMagnitude(
     eval(lines.reduce((p,c) => { if (p) { return addAndReduce(p,c)} else return c }))
 ))
+
+let pairs = []
+for (let i = 0; i < lines.length; i++) {
+    for (let j = 0; j < lines.length; j++) {
+        pairs.push([i,j])
+    }
+}
+
+let linePairs = pairs.map( p => p.map(n => lines[n]))
+let r = linePairs.map(lp => calculateMagnitude(eval(addAndReduce(lp[0], lp[1])))).reduce((p,c) => Math.max(p,c), 0)
+console.log(r)
