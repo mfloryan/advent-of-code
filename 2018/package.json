@@ -23,6 +23,6 @@
     "lodash": "^4.17.19"
   },
   "devDependencies": {
-    "mocha": "^9.1.3"
+    "mocha": "^9.2.2"
   }
 }
