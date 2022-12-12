@@ -1,16 +1,7 @@
 # Advent of Code
 
-I contrinue to practice coding every December with https://adventofcode.com/
+I continue to practice coding every December with https://adventofcode.com/
 
-## 2017
+The code is written in `JavaScript` as `nodejs` is a convenient, if slow, environment.
 
-See insite `2017/` for some attempts
-
-## 2018
-
-See inside `2018/`. This one went pretty well.
-
-## 2019
-
-Well, by now you know `2019/`
-
+Each year got its own folder and so did each day.
