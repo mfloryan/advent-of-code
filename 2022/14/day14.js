@@ -102,15 +102,43 @@ function solveInput(rock) {
     bounds.minY = 0
     let map = createBox(rock, bounds)
 
-    console.log(map.map(l => l.map(r=>r[0]).join('')).join('\n'))
+    // console.log(map.map(l => l.map(r=>r[0]).join('')).join('\n'))
 
     dropGrainOfSand(map, bounds.maxY, bounds.maxX, {x: 500 - bounds.minX, y: 1})
-    console.log(map.map(l => l.map(r=>r[0]).join('')).join('\n'))
+    // console.log(map.map(l => l.map(r=>r[0]).join('')).join('\n'))
+    console.log(map.flatMap(r => r.map(e => e[0]).filter(e => e=='o')).length)
+
+}
+
+function solveInput2(rock) {
+    let boundaries = rock.reduce(
+        (p,c) => [
+            [Math.min(p[0][0],c[0]), Math.max(p[0][1],c[0]) ],
+            [Math.min(p[1][0],c[1]),Math.max(p[1][1],c[1])] ]
+        , [[Infinity,-Infinity],[Infinity, -Infinity]])
+    const bounds = {
+        minX: boundaries[0][0],
+        maxX: boundaries[0][1],
+        minY: boundaries[1][0],
+        maxY: boundaries[1][1],
+    }
+    bounds.minY = 0
+
+    bounds.maxY += 2;
+    let dx = bounds.maxY + 2
+
+    bounds.minX = 500 - dx
+    bounds.maxX = 500 + dx
+
+    let map = createBox(rock, bounds)
+    map[map.length-1].forEach((v,i) => map[map.length-1][i][0] = '#')
+
+    dropGrainOfSand(map, bounds.maxY, bounds.maxX, {x: 500 - bounds.minX, y: 0})
     console.log(map.flatMap(r => r.map(e => e[0]).filter(e => e=='o')).length)
 
 }
 
 let rock = getAllRocks(rockLines)
 solveInput(rock)
-// solveInput2(rock)
+solveInput2(rock)
 
