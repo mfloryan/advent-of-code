@@ -59,18 +59,24 @@ function getElementsOfSlice(relevantBoardSlice, offset) {
 function playTetris(moves, simulateRocks) {
     let board = []
 
-    let moveIndex = 0;
-    for (let rock = 0; rock < simulateRocks; rock++) {
+    let startRock = 0
+    let moveIndex = 0
+    let totalHeight = 0
+
+    if (simulateRocks > (1730 + 1720)) {
+        let cycleMoves = Math.floor(( (simulateRocks - 1730) / 1720))
+        totalHeight = 2773 + cycleMoves * 2738
+        startRock =  (cycleMoves * 1720) + 1730
+        moveIndex = 9
+    }
+
+    for (let rock = startRock; rock < simulateRocks; rock++) {
+
         let nextRock = rocks[rock % rocks.length]
         let rockHeight = nextRock.length
         let freeSpaceAtTheTop = board.slice(-8).filter(row => row.every(p => p == ".")).length
         let howMuchSpaceWeNeed = rockHeight + 3
         let howManyNewRowsToAdd = howMuchSpaceWeNeed - freeSpaceAtTheTop
-
-        // console.log("WHY!?")
-        // console.log('---',freeSpaceAtTheTop, howMuchSpaceWeNeed, howManyNewRowsToAdd)
-
-        // showBoard(board)
 
         if (howManyNewRowsToAdd >= 0) {
             addRowsToBoard(board, howManyNewRowsToAdd)
@@ -80,31 +86,20 @@ function playTetris(moves, simulateRocks) {
             }
         }
 
-        // showBoard(board)
-
         nextRock.forEach((row, y) => {
             row.forEach((e, x) => {
                 board[board.length - 1 - y][2 + x] = nextRock[y][x]
             })
         })
 
-        // console.log("new rock", rock, rock % rocks.length)
-        // showBoard(board)
-
         let rockBottomIndex = board.length - 1
         while (true) {
-
-            // console.log('\n** next move sequence', move)
-            // showBoard(board)
-            // console.log("*** moving ***")
-            // horizontal move
-
             let arrayIndexA = Math.max(rockBottomIndex - rockHeight, 0)
             let arrayIndexB = rockBottomIndex
             let relevantBoardSlice = board.slice(arrayIndexA, arrayIndexB + 1)
 
-            let move = moves[moveIndex % moves.length]
-            moveIndex++
+            let move = moves[moveIndex]
+            moveIndex = (moveIndex + 1) % moves.length
 
             let direction = (move == '<') ? -1 : 1
             let elements = getElementsOfSlice(relevantBoardSlice, arrayIndexA)
@@ -113,10 +108,6 @@ function playTetris(moves, simulateRocks) {
                 elements.forEach(e => board[e[1]][e[0] + direction] = '@')
             }
 
-            // console.log('--ah-',moveIndex, move)
-            // showBoard(board)
-
-            // vertical move
             elements = getElementsOfSlice(relevantBoardSlice, arrayIndexA)
             if (canMoveVert(board, elements)) {
                 elements.forEach(e => board[e[1]][e[0]] = '.')
@@ -126,15 +117,12 @@ function playTetris(moves, simulateRocks) {
                 elements.forEach(e => board[e[1]][e[0]] = '#')
                 break
             }
-            // console.log('---')
-            // showBoard(board)
         }
 
     }
     // showBoard(board)
-    console.log(board.filter(r => r.join('') != ".......").length)
-
+    console.log(totalHeight + board.filter(r => r.join('') != ".......").length)
 }
 
 playTetris(moves, 2022)
-// playTetris(moves, 1000000000000)
+playTetris(moves, 1000000000000)
