@@ -71,26 +71,16 @@ function yelling(monkeys) {
     return monkeys['root']
 }
 
-console.log(yelling(monkeys))
+console.log(yelling(monkeys)[0])
 
-// for (let i = 0; i < 100000; i++) {
-//     monkeys = {}
-//     for (const monkey of data) {
-//         monkeys[monkey[0]] = monkey.slice(1)
-//     }
-//     monkeys['root'][1] = '='
-//     monkeys['humn'] = [ i ]
-//     if (yelling(monkeys) == true) console.log(i)
-// }
-
-function recuseRootPath(monkeys, start = 'root', path = []) {
+function generateEquation(monkeys, start = 'root', path = []) {
     let monkey = monkeys[start]
     // if (!monkey) console.log("error", start)
     if (monkey.length == 1) {
         if (start == 'humn') return "h"; else return monkey[0]
     } else {
-        let a = recuseRootPath(monkeys, monkeys[start][0])
-        let b = recuseRootPath(monkeys, monkeys[start][2])
+        let a = generateEquation(monkeys, monkeys[start][0])
+        let b = generateEquation(monkeys, monkeys[start][2])
         if (!isNumber(a) && !a.includes('h')) {
             a = eval(a)
         }
@@ -108,18 +98,25 @@ for (const monkey of data) {
 }
 monkeys['root'][1] = '=='
 
-let eq = recuseRootPath(monkeys)
+let eq = generateEquation(monkeys)
 
-let [l,r] = eq.split("==")
+let [l, r] = eq.split("==")
 l = l.substring(1)
-r = r.substring(0,r.length-1)
-console.log(l,"==",r)
+r = r.substring(0, r.length - 1)
 
-let start = 3*Math.pow(10,12) + 5*Math.pow(10,10) + 9* Math.pow(10,9) + 3*Math.pow(10,8) +6*Math.pow(10,7)
-for (let i = start ; i < Math.pow(10,13); i++) {
- if (eval(eq.replace("h", i)) == true) {
-    console.log(i)
-    break;
- }
+function bisect(left, right, test) {
+    while (true) {
+        let mid = (left + right) / 2
+        let midL = Math.floor(mid)
+        let midH = Math.ceil(mid)
+        let result = test(midL)
+        if (result == 0) return midL; else
+            if (result < 0) {
+                left = midH
+            } else {
+                right = midL
+            }
+    }
 }
-// let eq2 = eq.replace("h",100)
+
+console.log(bisect(0, 4 * Math.pow(10, 12), v => Math.sign(Number(r) - eval(l.replace("h", v)))))
