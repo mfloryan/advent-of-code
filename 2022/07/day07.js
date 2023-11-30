@@ -4,7 +4,7 @@ let lines = loadLines('07/input.txt')
 
 function parseInput(lines) {
     let tree_location = ""
-    let tree = {name: "/", dirs:[], files: []}
+    let tree = { name: "/", dirs: [], files: [] }
     lines.forEach(line => {
         let c = line.split(' ')
         if (c[0] == "$") {
@@ -12,7 +12,7 @@ function parseInput(lines) {
                 let dir = c[2]
                 if (dir == "..") {
                     // relative dir
-                    tree_location = tree_location.substring(0,tree_location.lastIndexOf("/"))
+                    tree_location = tree_location.substring(0, tree_location.lastIndexOf("/"))
                     if (tree_location == "") tree_location = "/"
                 } else {
                     // absolute dir
@@ -37,14 +37,14 @@ function parseInput(lines) {
                 if (dir) {
                     currentTreeDir = dir
                 } else {
-                    currentTreeDir.dirs.push({name: n, dirs:[], files: []})
+                    currentTreeDir.dirs.push({ name: n, dirs: [], files: [] })
                 }
             })
             let file = line.split(' ')
             if (file[0] == "dir") {
-                currentTreeDir.dirs.push({name: file[1], dirs:[], files: []})
+                currentTreeDir.dirs.push({ name: file[1], dirs: [], files: [] })
             } else {
-                currentTreeDir.files.push({name: file[1], size: parseInt(file[0])})
+                currentTreeDir.files.push({ name: file[1], size: parseInt(file[0]) })
             }
         }
     });
@@ -54,22 +54,21 @@ function parseInput(lines) {
 let tree = parseInput(lines)
 // console.log(tree)
 
-function addDirSize(dir, size = 0) {
+function addDirSize(dir) {
     let totalSize = 0;
     dir.dirs.forEach(d => {
-        totalSize += addDirSize(d,0)
+        totalSize += addDirSize(d)
     })
-    totalSize += dir.files.reduce((p,c) => p + c.size,0)
+    totalSize += dir.files.reduce((p, c) => p + c.size, 0)
     dir.totalSize = totalSize
     return totalSize
 }
 
-// console.log("/".split("/"))
 // console.log(tree)
 addDirSize(tree)
 // console.log(tree)
 
-function getTotalSizeWithThreshold(dir, threshold, total = {size:0}) {
+function getTotalSizeWithThreshold(dir, threshold, total = { size: 0 }) {
     dir.dirs.forEach(d => {
         getTotalSizeWithThreshold(d, threshold, total)
     })
@@ -84,7 +83,7 @@ let freeSpace = 70000000 - tree.totalSize
 let missingSpace = 30000000 - freeSpace
 
 function getEachDirSize(dir, collection = []) {
-    collection.push({d: dir.name, size: dir.totalSize})
+    collection.push({ d: dir.name, size: dir.totalSize })
     dir.dirs.forEach(d => {
         getEachDirSize(d, collection)
     })
@@ -92,5 +91,5 @@ function getEachDirSize(dir, collection = []) {
 }
 
 let dirs = getEachDirSize(tree).filter(d => d.size >= missingSpace)
-dirs.sort((a,b) => a.size - b.size)
+dirs.sort((a, b) => a.size - b.size)
 console.log(dirs[0].size)

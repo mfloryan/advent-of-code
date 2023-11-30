@@ -35,7 +35,6 @@ const around = [
     {x: -1, y:  1},
 ]
 
-
 function add(a, b) {
     return {x: a.x + b.x, y: a.y + b.y}
 }
