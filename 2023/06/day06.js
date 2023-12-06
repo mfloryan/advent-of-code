@@ -27,9 +27,20 @@ function waysToWin(time, distance) {
     return count
 }
 
-console.log(races.map(_ => waysToWin(_.time, _.distance)).reduce((p, c) => p * c, 1))
+function waysToWin2(time, distance) {
+    let a = -1
+    let b = time
+    let c = (-1) * distance
+
+    let t1 = ( - b + Math.sqrt(Math.pow(b, 2) - 4 * a * c)) / (2 * a)
+    let t2 = ( - b - Math.sqrt(Math.pow(b, 2) - 4 * a * c)) / (2 * a)
+
+    return ( Math.floor(t2) - Math.floor(t1))
+}
+
+console.log(races.map(_ => waysToWin2(_.time, _.distance)).reduce((p, c) => p * c, 1))
 
 let time = parseInt(races.map(r => r.time).join(''))
 let distance = parseInt(races.map(r => r.distance).join(''))
 
-console.log(waysToWin(time, distance))
+console.log(waysToWin2(time, distance))
