@@ -53,11 +53,8 @@ function expandCards(cards) {
             let copies = expansions[index];
 
             for (let i = Math.min(index + 1, cards.length - 1); i <= Math.min(index + matchingNumbers, cards.length - 1); i++) {
-                if (expansions[i]) {
-                    expansions[i] += copies
-                } else {
-                    expansions[i] = copies
-                }
+                if (!expansions[i]) expansions[i] = 0
+                expansions[i] += copies
             }
         }
     })
