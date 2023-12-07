@@ -17,8 +17,9 @@ function parse(line) {
 let data = input.split('\n').map(parse)
 
 const ranks = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2'].reverse()
+const ranks2 = ['A', 'K', 'Q', 'T', '9', '8', '7', '6', '5', '4', '3', '2', 'J'].reverse()
 
-function getHandType(hand) {
+function getHandScore(hand) {
     stats = []
     hand.forEach(card => {
         let cardStat = stats.find(s => s.card == card)
@@ -40,22 +41,65 @@ function getHandType(hand) {
     return 1
 }
 
-function rankPairsSameType(a, b) {
+function rankPairsSameType(a, b, ranks) {
     for (let i = 0; i < a.length; i++) {
         if (a[i] != b[i]) return ranks.indexOf(a[i]) - ranks.indexOf(b[i])
     }
     return 0
 }
 
+
 function rankHands(a, b) {
+    let rankA = getHandScore(a)
+    let rankB = getHandScore(b)
 
-    let rankA = getHandType(a)
-    let rankB = getHandType(b)
-
-    if (rankA == rankB) return rankPairsSameType(a, b)
-    return rankA - rankB
+    return ((rankA - rankB) * (ranks.length + 1) + rankPairsSameType(a, b, ranks))
 }
 
-data.sort((a,b) => rankHands(a[0], b[0]))
+function rankHands2(a, b) {
+    return ((a[2] - b[2]) * (ranks2.length + 1) + rankPairsSameType(a[0], b[0], ranks2))
+}
 
-console.log(data.map((hand, index) => (hand[1] * (index + 1))).reduce((p,c) => p+c))
+
+function buildAlternatives(hand, cards, list_of_alternatives = []) {
+    if (cards.length == 5) {
+        list_of_alternatives.push(cards)
+        return
+    }
+    if (hand[cards.length] == 'J') {
+        ranks2.slice(1).forEach(card => {
+            let newCards = cards.slice()
+            newCards.push(card)
+            buildAlternatives(hand, newCards, list_of_alternatives)
+        })
+    } else {
+        let newCards = cards.slice()
+        newCards.push(hand[cards.length])
+        buildAlternatives(hand, newCards, list_of_alternatives)
+    }
+}
+
+function getBestType(hand) {
+    let initialType = getHandScore(hand)
+    if (initialType == 7) return initialType
+    if (hand.includes('J')) {
+        let list_of_alternatives = []
+        buildAlternatives(hand, [], list_of_alternatives)
+        ranked_alternatives = list_of_alternatives.map(_ => [_, getHandScore(_)])
+        ranked_alternatives.sort((a, b) => b[1] - a[1])
+        return ranked_alternatives[0][1]
+    } else {
+        return initialType
+    }
+}
+
+function tallyScore(games) {
+    return games.map((hand, index) => (hand[1] * (index + 1))).reduce((p, c) => p + c)
+}
+
+data.sort((a, b) => rankHands(a[0], b[0]))
+console.log(tallyScore(data))
+
+let handsWithNewRank = data.map(hand => [hand[0], hand[1], getBestType(hand[0])])
+handsWithNewRank.sort(rankHands2)
+console.log(tallyScore(handsWithNewRank))
