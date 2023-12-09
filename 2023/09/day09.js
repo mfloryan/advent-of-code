@@ -6,58 +6,19 @@ let input = fs.readFileSync(path.join(__dirname, 'input.txt'), { encoding: 'utf8
 let lines = input.split('\n')
 let data = lines.map(l => l.split(' ').map(_ => parseInt(_)))
 
-function extrapolateNextValue(history) {
-    let rows = []
-    rows[0] = history.slice()
-    let rowIndex = 0
-
-    while (!rows[rowIndex].every(v => v == 0)) {
-        let newRow = []
-        let currentRow = rows[rowIndex]
-        for (let i = 0; i < currentRow.length - 1; i++) {
-            newRow.push(currentRow[i + 1] - currentRow[i])
-        }
-        rows.push(newRow)
-        rowIndex++;
+function extrapolate(row) {
+    nextRow = []
+    row.reduce((p, c) => { nextRow.push(c - p); return c })
+    if (nextRow.some(_ => _ != 0)) {
+        [first, last] = extrapolate(nextRow)
+        return [row[0] - first, row[row.length - 1] + last]
+    } else {
+        return [row[0], row[row.length - 1]]
     }
-
-    rows[rows.length - 1].push(0)
-
-    for (let i = rows.length - 2; i >= 0; i--) {
-        rows[i].push(rows[i][rows[i].length - 1] + rows[i + 1][rows[i + 1].length - 1])
-    }
-
-    return rows[0][rows[0].length - 1]
 }
 
-function extrapolatePreviousValue(history) {
-    let rows = []
-    rows[0] = history.slice()
-    let rowIndex = 0
+const sumPairs = (p, c) => [p[0] + c[0], p[1] + c[1]]
 
-    while (!rows[rowIndex].every(v => v == 0)) {
-        let newRow = []
-        let currentRow = rows[rowIndex]
-        for (let i = 0; i < currentRow.length - 1; i++) {
-            newRow.push(currentRow[i + 1] - currentRow[i])
-        }
-        rows.push(newRow)
-        rowIndex++;
-    }
-
-    rows[rows.length - 1].unshift(0)
-
-    for (let i = rows.length - 2; i >= 0; i--) {
-        rows[i].unshift(rows[i][0] - rows[i + 1][0])
-    }
-
-    return rows[0][0]
-}
-
-const sum = (p, c) => p + c
-
-let part1 = data.map(row => extrapolateNextValue(row)).reduce(sum)
-console.log(part1)
-
-let part2 = data.map(row => extrapolatePreviousValue(row)).reduce(sum)
-console.log(part2)
+let answers = data.map(extrapolate).reduce(sumPairs, [0, 0])
+console.log(answers[1])
+console.log(answers[0])
