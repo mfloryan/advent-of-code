@@ -3,12 +3,6 @@ const path = require('path')
 
 let input = fs.readFileSync(path.join(__dirname, 'input.txt'), { encoding: 'utf8' })
 
-// input = `..F7.
-// .FJ|.
-// SJ.L7
-// |F--J
-// LJ...`
-
 let maze = input.split('\n').map(l => l.split(''))
 
 const pipeBends = {
@@ -31,11 +25,11 @@ const surrounding = [
     { x: -1, y: 1 },
 ]
 
-const offset = (p1, p2) => { return {x: p1.x + p2.x, y: p1.y + p2.y }}
+const offset = (p1, p2) => { return { x: p1.x + p2.x, y: p1.y + p2.y } }
 const samePoint = (p1, p2) => p1.x == p2.x & p1.y == p2.y
 
 function findStartType(maze, start) {
-    [a,b] = findNextSteps(maze, start)
+    [a, b] = findAllPossibleMatches(maze, start)
     let options = Object.keys(pipeBends)
     for (const o of options) {
         let so = pipeBends[o].map(_ => offset(start, _))
@@ -43,12 +37,7 @@ function findStartType(maze, start) {
     }
 }
 
-function findAround(maze, location) {
-    let around = surrounding.map(_ => offset(location, _))
-    return maze.filter(m => around.some(a => a.x == m.x && a.y == m.y))
-}
-
-function findNextSteps(maze, start) {
+function findAllPossibleMatches(maze, start) {
     let around = findAround(maze, start)
     let next = []
     around.forEach(a => {
@@ -63,7 +52,17 @@ function findNextSteps(maze, start) {
     return next
 }
 
-function moveInMaze(maze, position, visited = [], distance = 0) {
+function findAround(maze, location) {
+    let around = surrounding.map(_ => offset(location, _))
+    return maze.filter(m => around.some(a => a.x == m.x && a.y == m.y))
+}
+
+function findNextStep(maze, location) {
+    let next = pipeBends[location.c].map(_ => offset(_, location))
+    return next.map(n => maze.find(_ => samePoint(_, n)))
+}
+
+function followThePipes(maze, position, visited = []) {
     visited.push(position)
     let queue = []
     position.d = 0
@@ -71,9 +70,9 @@ function moveInMaze(maze, position, visited = [], distance = 0) {
 
     while (queue.length > 0) {
         const node = queue.shift()
-        let next = findNextSteps(maze, node)
-        let unvisitedNext = next.filter(n => !visited.some(v => samePoint(n,v)))
-        unvisitedNext.forEach( n => {
+        let next = findNextStep(maze, node)
+        let unvisitedNext = next.filter(n => !visited.some(v => samePoint(n, v)))
+        unvisitedNext.forEach(n => {
             n.d = node.d + 1
             visited.push(n)
             queue.push(n)
@@ -87,5 +86,30 @@ let start = mazeList.find(_ => _.c == 'S')
 start.c = findStartType(mazeList, start)
 
 let visited = []
-moveInMaze(mazeList, start, visited)
+followThePipes(mazeList, start, visited)
 console.log(visited[visited.length - 1].d)
+
+let max = mazeList[mazeList.length - 1]
+
+function countEncosed(loop, max) {
+    let enclosed = 0
+
+    for (let y = 0; y <= max.y; y++) {
+        let inside = false
+        for (let x = 0; x <= max.x; x++) {
+            let pointInLoop = loop.find(_ => samePoint(_, { x, y }))
+            if (pointInLoop) {
+                // scanning vertically
+                if (['|', '7', 'F'].includes(pointInLoop.c)) inside = !inside
+            } else {
+                if (inside) {
+                    enclosed++
+                }
+            }
+        }
+    }
+
+    return enclosed
+}
+
+console.log(countEncosed(visited, max))
