@@ -3,8 +3,6 @@ const path = require('path')
 
 let input = fs.readFileSync(path.join(__dirname, 'input.txt'), { encoding: 'utf8' })
 
-let maze = input.split('\n').map(l => l.split(''))
-
 const pipeBends = {
     '|': [{ x: 0, y: -1 }, { x: 0, y: 1 }],
     '-': [{ x: -1, y: 0 }, { x: 1, y: 0 }],
@@ -71,7 +69,7 @@ function followThePipes(maze, position, visited = []) {
     while (queue.length > 0) {
         const node = queue.shift()
         let next = findNextStep(maze, node)
-        let unvisitedNext = next.filter(n => !visited.some(v => samePoint(n, v)))
+        let unvisitedNext = next.filter(n => !visited.includes(n))
         unvisitedNext.forEach(n => {
             n.d = node.d + 1
             visited.push(n)
@@ -80,7 +78,10 @@ function followThePipes(maze, position, visited = []) {
     }
 }
 
-let mazeList = maze.flatMap((row, y) => row.map((c, x) => { return { x, y, c } }))
+let maze = input.split('\n').map(l => l.split(''))
+
+let mazeArray = maze.map((row, y) => row.map((c,x) => { return {x,y,c}}))
+let mazeList = mazeArray.flatMap(_ => _)
 
 let start = mazeList.find(_ => _.c == 'S')
 start.c = findStartType(mazeList, start)
@@ -91,16 +92,16 @@ console.log(visited[visited.length - 1].d)
 
 let max = mazeList[mazeList.length - 1]
 
-function countEncosed(loop, max) {
+function countEncosed(mazeArray, loop, max) {
     let enclosed = 0
 
     for (let y = 0; y <= max.y; y++) {
         let inside = false
         for (let x = 0; x <= max.x; x++) {
-            let pointInLoop = loop.find(_ => samePoint(_, { x, y }))
-            if (pointInLoop) {
+            let point = mazeArray[y][x]
+            if (loop.includes(point)) {
                 // scanning vertically
-                if (['|', '7', 'F'].includes(pointInLoop.c)) inside = !inside
+                if (['|', '7', 'F'].includes(point.c)) inside = !inside
             } else {
                 if (inside) {
                     enclosed++
@@ -112,4 +113,4 @@ function countEncosed(loop, max) {
     return enclosed
 }
 
-console.log(countEncosed(visited, max))
+console.log(countEncosed(mazeArray, visited, max))
