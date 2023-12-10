@@ -4,14 +4,14 @@ const path = require('path')
 let input = fs.readFileSync(path.join(__dirname, 'input.txt'), { encoding: 'utf8' })
 
 function parse(line) {
-  let [a, b] = line.split(" = ")
-  let c = b.split(', ')
-  return {
-    node:a, 'L':c[0].substring(1), 'R':c[1].substring(0,3)
-  }
+    let [a, b] = line.split(" = ")
+    let c = b.split(', ')
+    return {
+        label: a, 'L': c[0].substring(1), 'R': c[1].substring(0, 3)
+    }
 }
 
-let [a,b] = input.split('\n\n')
+let [a, b] = input.split('\n\n')
 let turns = a.split('')
 let map = b.split('\n').map(parse)
 
@@ -30,11 +30,18 @@ function findEnd(map, turns, start, endCondition) {
     return steps
 }
 
-const gcd = (a, b) => a ? gcd(b % a, a) : b;
-const lcm = (a, b) => a * b / gcd(a, b);
+const gcd = (a, b) => a ? gcd(b % a, a) : b
+const lcm = (a, b) => a * b / gcd(a, b)
 
 console.log(findEnd(map, turns, 'AAA', p => p == 'ZZZ'))
 
-let ghosts = map.filter(_ => _.node.endsWith('A')).map(_ => _.node).map(_ => findEnd(map, turns, _, p => p.endsWith('Z')))
+const startNodes = _ => _ => _.node.endsWith('A')
+const nodeLabel = _ => _.label
+const findStepsToLastNode = _ => findEnd(map, turns, _, p => p.endsWith('Z'))
+
+let ghosts = map
+    .filter(startNodes)
+    .map(nodeLabel)
+    .map(findStepsToLastNode)
 
 console.log(ghosts.reduce(lcm))
