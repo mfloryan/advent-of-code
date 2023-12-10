@@ -1,7 +1,7 @@
 {
-  "name": "advent-of-code-2021",
+  "name": "advent-of-code-2022",
   "version": "1.0.0",
-  "description": "Advent of Code 2021",
+  "description": "Advent of Code 2022",
   "main": "index.js",
   "repository": "https://github.com/mfloryan/advent-of-code",
   "author": "Marcin Floryan",
