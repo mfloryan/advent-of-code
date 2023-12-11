@@ -3,20 +3,20 @@ const path = require('path')
 
 let input = fs.readFileSync(path.join(__dirname, 'input.txt'), { encoding: 'utf8' })
 
-function getEmptyRows(image, max) {
+function getEmptyRows(galaxies, max) {
     let rows = []
     for (let y = 0; y <= max.y; y++) {
-        if (image.filter(_ => _.y == y).every(_ => _.c == ".")) {
+        if (galaxies.filter(_ => _.y == y).length == 0) {
             rows.push(y)
         }
     }
     return rows
 }
 
-function getEmptyColumns(image, max) {
+function getEmptyColumns(galaxies, max) {
     let cols = []
     for (let x = 0; x <= max.x; x++) {
-        if (image.filter(_ => _.x == x).every(_ => _.c == ".")) {
+        if (galaxies.filter(_ => _.x == x).length == 0) {
             cols.push(x)
         }
     }
@@ -53,10 +53,9 @@ function getPairs(galaxies) {
 let image = input.split('\n').flatMap((row, y) => row.split('').map((_, x) => { return { x, y, c: _ } }))
 let max = image[image.length - 1]
 
-let emptyRows = getEmptyRows(image, max)
-let emptyColumns = getEmptyColumns(image, max)
-
 let galaxies = image.filter(_ => _.c == '#')
+let emptyRows = getEmptyRows(galaxies, max)
+let emptyColumns = getEmptyColumns(galaxies, max)
 
 let sum = getPairs(expandUniverse(galaxies, emptyRows, emptyColumns)).reduce((p, c) => p + getShortestPath(c[0], c[1]), 0)
 console.log(sum)
