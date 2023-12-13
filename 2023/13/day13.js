@@ -3,25 +3,23 @@ const path = require('path')
 
 let input = fs.readFileSync(path.join(__dirname, 'input.txt'), { encoding: 'utf8' })
 
-
-
-function findPossibleVerticalLine(image){
+function findPossibleVerticalLine(image) {
     let options = []
-    for (let x = 0; x < image[0].length-1; x++) {
+    for (let x = 0; x < image[0].length - 1; x++) {
         let line1 = [], line2 = []
         for (let y = 0; y < image.length; y++) {
             line1.push(image[y][x])
-            line2.push(image[y][x+1])
+            line2.push(image[y][x + 1])
         }
-        if (line1.join('') == line2.join('')) options.push(x+1)
+        if (line1.join('') == line2.join('')) options.push(x + 1)
     }
     return options
 }
 
-function findPossibleHorizontalLine(image){
+function findPossibleHorizontalLine(image) {
     let options = []
-    for (let y = 0; y < image.length-1; y++) {
-        if (image[y].join('') == image[y+1].join('')) options.push(y+1)
+    for (let y = 0; y < image.length - 1; y++) {
+        if (image[y].join('') == image[y + 1].join('')) options.push(y + 1)
     }
     return options
 }
@@ -55,37 +53,29 @@ function validateHorizontalLine(image, line) {
     return true
 }
 
+function analyseImage(image, ignore = 0) {
+    let v = findPossibleVerticalLine(image).filter(l => validateVerticalLine(image, l));
+    let h = findPossibleHorizontalLine(image).filter(l => validateHorizontalLine(image, l));
+    let r = [...v, ...h.map(_ => _ * 100)].filter(_ => _ != ignore)
+    if (r.length) return r[0]
+    return false
+}
 
-// input = `#.##..##.
-// ..#.##.#.
-// ##......#
-// ##......#
-// ..#.##.#.
-// ..##..##.
-// #.#.##.#.
+function smudgeFixImage(image) {
+    let originalLine = analyseImage(image);
+    for (let x = 0; x < image[0].length; x++) {
+        for (let y = 0; y < image.length; y++) {
+            let newImage = image.slice().map(r => r.slice())
+            if (image[y][x] == '.') newImage[y][x] = '#'; else newImage[y][x] = '.'
+            let a = analyseImage(newImage, originalLine)
+            if (a !== false) {
+                return a
+            }
+        }
+    }
+}
 
-// #...##..#
-// #....#..#
-// ..##..###
-// #####.##.
-// #####.##.
-// ..##..###
-// #....#..#`
+let images = input.split('\n\n').map(t => t.split('\n').map(t => t.split('')))
 
-let things = input.split('\n\n');
-
-let images = things.map(t => t.split('\n').map(t => t.split('')))
-
-
-let x = images.map((image,index) => {
-    return {i: index, 
-        v: findPossibleVerticalLine(image).filter(l => validateVerticalLine(image, l)),
-        h: findPossibleHorizontalLine(image).filter(l => validateHorizontalLine(image, l))
-    }})
-
-let v = x.map(_ => {
-    if (_.v.length > 0) return _.v[0];
-    else return _.h[0]*100;
-})
-
-console.log(v.reduce((p,c) => p+c))
+console.log(images.map(analyseImage).reduce((p, c) => p + c))
+console.log(images.map(smudgeFixImage).reduce((p, c) => p + c))
