@@ -71,7 +71,7 @@ function slideDirection(dish, direction) {
         moved = false
         for (let y = 0; y < dish.length; y++) {
             for (let x = 0; x < dish[0].length; x++) {
-                let rock = dish[y][x];
+                let rock = dish[y][x]
                 if (rock == "O") {
                     if (directionMoves[direction](x, y, dish)) moved = true
                 }
@@ -127,13 +127,14 @@ function findCycle(list) {
 // #....###..
 // #OO..#....`
 
-let dish = input.split('\n').map((row, y) => row.split('').map((c, x) => { return c }))
+let dish = input.split('\n').map(row => row.split(''))
 
 console.log(countLoad(slideNorth(dish)))
 
-let dish2 = input.split('\n').map((row, y) => row.split('').map((c, x) => { return c }))
+let dish2 = input.split('\n').map(row => row.split(''))
 
 let values = []
+let cycle
 
 for (let i = 0; i < 1000000000; i++) {
     directions.forEach(d => {
@@ -141,12 +142,12 @@ for (let i = 0; i < 1000000000; i++) {
     })
     let load = countLoad(dish2)
     values.push(load)
-    if (i == 200) break;
+    let c = findCycle(values)
+    if (c.length > 0) {
+        cycle = { offset: c[0].s, length: c[0].l, values: values.slice(c[0].s, c[0].s + c[0].l) }
+        break
+    }
 }
 
-let c = findCycle(values)[0]
-
-let cycle = values.slice(c.s, c.s + c.l)
-
 let moves = 1000000000 - 1
-console.log(cycle[(moves - c.s) % cycle.length])
+console.log(cycle.values[(moves - cycle.offset) % cycle.length])
