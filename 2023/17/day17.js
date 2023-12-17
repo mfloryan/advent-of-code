@@ -18,25 +18,27 @@ function inCity(city, point) {
 
 function createGraph(city, possibleNodes) {
     let graph = new Map()
+    let graphUltra = new Map()
 
     for (const node of possibleNodes) {
         for (const direction of Object.keys(moves)) {
             if (moves[node.d].x == moves[direction].x || moves[node.d].y == moves[direction].y) continue
             let heat = 0
             let next = node
-            for (let i = 0; i < 3; i++) {
+            for (let i = 0; i < 10; i++) {
                 next = apply(next, moves[direction])
                 if (inCity(city, next)) {
                     heat += city[next.y][next.x].c
                     let newNode = possibleNodes.find(_ => _.x == next.x && _.y == next.y && _.d == direction)
-                    if (!graph.get(node)) graph.set(node, [])
-                    graph.get(node).push([newNode, heat])
+                    let g = (i<3)?graph:graphUltra
+                    if (!g.get(node)) g.set(node, [])
+                    g.get(node).push([newNode, heat])
                 }
             }
         }
     }
 
-    return graph
+    return [graph, graphUltra]
 }
 
 class PriorityQueue {
@@ -105,8 +107,6 @@ function dijkstra(graph, start, end) {
     return distances.get(end);
 }
 
-
-
 // input = `2413432311323
 // 3215453535623
 // 3255245654254
@@ -126,12 +126,17 @@ let city = input.split('\n').map(r => r.split('').map(_ => { return { c: parseIn
 
 let possibleNodes = city.flatMap((r, y) => r.flatMap((_, x) => Object.keys(moves).map(move => { return { x, y, h: _.c, d: move } })))
 
-let graph = createGraph(city, possibleNodes)
+let [graph, graphUltra] = createGraph(city, possibleNodes)
 
-let part1 = Infinity
-for (const start of possibleNodes.filter(_ => _.x == 0 && _.y == 0)) {
-    for (const end of possibleNodes.filter(_ => _.x == city[0].length - 1 && _.y == city.length - 1)) {
-        part1 = Math.min(dijkstra(graph, start, end), part1)
+function findAnswer(possibleNodes, graph) {
+    let answer = Infinity
+    for (const start of possibleNodes.filter(_ => _.x == 0 && _.y == 0 && ['^','<'].includes(_.d))) {
+        for (const end of possibleNodes.filter(_ => _.x == city[0].length - 1 && _.y == city.length - 1 && ['>','v'].includes(_.d))) {
+            answer = Math.min(dijkstra(graph, start, end), answer)
+        }
     }
+    return answer
 }
-console.log(part1)
+
+console.log(findAnswer(possibleNodes, graph))
+console.log(findAnswer(possibleNodes, graphUltra))
