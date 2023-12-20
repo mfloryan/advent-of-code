@@ -33,51 +33,61 @@ function initState(modules) {
     return system
 }
 
-function propagateSignal(modules, start, system, outProcessor = undefined) {
-    let pulseCount = [0,0]
+const getNextSignal = (from, name, pulse) => { return { from, name, pulse } }
+const addNextSignals = (queue, next, from, pulse) => queue.push(...next.map(_ => getNextSignal(from, _, pulse)))
+
+function propagateSignal(modules, start, system, signalProcessor = undefined) {
     let q = []
-    start.next.map(_ => { return { from: start.name, name: _, pulse: false } }).forEach(_ => q.push(_))
+    addNextSignals(q, start.next, start.name, false)
 
     while (q.length > 0) {
-        let nextStep = q.shift()
-        let m = modules.find(_ => _.name == nextStep.name)
-        pulseCount[nextStep.pulse?1:0]++
-        // console.log("n:", nextStep, m)
-        if (!m) {
-            if (outProcessor) outProcessor(nextStep.pulse)
-        } else if (m.type == '%') {
-            if (!nextStep.pulse) {
+        let nextModuleAndPulse = q.shift()
+        let m = modules.find(_ => _.name == nextModuleAndPulse.name)
+        if (m && m.type == '%') {
+            if (!nextModuleAndPulse.pulse) {
                 system[m.name].state = !system[m.name].state
-                m.next.map(_ => { return { from: m.name, name: _, pulse: system[m.name].state } }).forEach(_ => q.push(_))
+                addNextSignals(q, m.next, m.name, system[m.name].state)
             }
-        } else if (m.type == '&') {
-            system[m.name].memory[nextStep.from] = nextStep.pulse
-            if (Object.values(system[m.name].memory).every(_ => _)) {
-                m.next.map(_ => { return { from: m.name, name: _, pulse: false } }).forEach(_ => q.push(_))
-            } else {
-                m.next.map(_ => { return { from: m.name, name: _, pulse: true } }).forEach(_ => q.push(_))
-            }
+        } else if (m && m.type == '&') {
+            system[m.name].memory[nextModuleAndPulse.from] = nextModuleAndPulse.pulse
+            addNextSignals(q, m.next, m.name, !Object.values(system[m.name].memory).every(_ => _))
         }
+
+        if (signalProcessor) signalProcessor(nextModuleAndPulse)
     }
-    return pulseCount
 }
 
+const gcd = (a, b) => a ? gcd(b % a, a) : b
+const lcm = (a, b) => a * b / gcd(a, b)
+
+// part 1
 let system = initState(modules)
-let count = [0,0];
-for (let i =0; i < 1000; i++) {
+let count = [0, 0];
+for (let i = 0; i < 1000; i++) {
     count[0]++
-    let c = propagateSignal(modules, broadcaster, system)
-    count[0] += c[0]
-    count[1] += c[1]
+    let c = propagateSignal(modules, broadcaster, system, p => count[p.pulse ? 1 : 0]++)
 }
 console.log(count[0] * count[1])
 
+// part 2
 system = initState(modules)
+let rxInputName = modules.find(_ => _.next.includes('rx')).name
+let inputSignalsCycle = modules.filter(_ => _.next.includes(rxInputName)).map(_ => _.name).reduce((p, c) => { p[c] = undefined; return p; }, {})
+
 let buttons = 0
 let done = false
 do {
     buttons++
-    if (buttons % 1000000 == 0) console.log( new Date().toISOString(), buttons)
-    let c = propagateSignal(modules, broadcaster, system, x => { console.log(x,i); if (!x) done=true;})
+    propagateSignal(modules, broadcaster, system, p => {
+        if (p.name == rxInputName && p.pulse) {
+            if (!inputSignalsCycle[p.from]) {
+                inputSignalsCycle[p.from] = buttons
+                if (Object.values(inputSignalsCycle).every(_ => _)) {
+                    done = true
+                }
+            }
+        }
+    })
 } while (!done)
-console.log(buttons)
+
+console.log(Object.values(inputSignalsCycle).reduce(lcm))
