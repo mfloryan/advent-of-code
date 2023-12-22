@@ -36,8 +36,57 @@ function process(program) {
     }
     return mem
 }
+
+function applyMask2(mask, value) {
+    let addressess = []
+    let binary = value.toString(2).padStart(36,0)
+    let masked = binary.split('').map((c,i) => {
+        if (mask[i] == '0') return c
+        else if (mask[i] == '1') return 1
+        else return mask[i]
+    })
+
+    createOptions(masked, [], addressess)
+
+    return addressess.map(_ => Number.parseInt(_, 2))
+}
+
+function createOptions(mask, value, options = []) {
+    if (value.length == mask.length) {
+        options.push(value.join(''))
+        return
+    }
+    if (mask[value.length] == 'X') {
+        createOptions(mask, [...value, '0'], options)
+        createOptions(mask, [...value, '1'], options)
+    } else {
+        createOptions(mask, [...value, mask[value.length]], options)
+    }
+}
+
+function process2(program) {
+    let mem = {}
+    let mask = "X".repeat(36)
+
+    for (const instruction of program) {
+        if (instruction.mask) {
+            mask = instruction.mask
+        }
+
+        if (instruction.index) {
+            let addressess = applyMask2(mask, instruction.index)
+
+            for (const adr of addressess) {
+                mem[adr] = instruction.value
+            }
+        }
+
+    }
+    return mem
+}
+
 let input = loadLines(__dirname)
 let data = input.map(parse)
 
-let result = process(data)
-console.log(Object.values(result).reduce((p,c) => p+c))
+console.log(Object.values(process(data)).reduce((p,c) => p+c))
+console.log(Object.values(process2(data)).reduce((p,c) => p+c))
