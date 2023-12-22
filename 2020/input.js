@@ -5,12 +5,12 @@ function parseNumbers(inputLines) {
     return inputLines.map(x => Number.parseInt(x))
 }
 
-function loadLines(name = "input.txt") {
-    return fs.readFileSync(path.join(__dirname, name), { encoding: 'utf8' }).split('\n')
+function loadLines(dir = __dirname, name = "input.txt") {
+    return fs.readFileSync(path.join(dir, name), { encoding: 'utf8' }).split('\n')
 }
 
-exports.loadNumbers = function(name = "input.txt") {
-    return parseNumbers(loadLines(name))
-    }
+exports.loadNumbers = function(dir = __dirname, name = "input.txt") {
+    return parseNumbers(loadLines(dir, name))
+}
 
 exports.loadLines = loadLines
