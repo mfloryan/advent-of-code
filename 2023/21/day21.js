@@ -98,7 +98,7 @@ let y = [
     walkGarden2(garden, flatGarden.find(o => o.c == "S"), x[2])
 ]
 
-console.log(x.map((v, i) => `a * ${Math.pow(v, 2)} + b * ${v} + c = ${y[i]}`).join('\n'));
+console.log(x.map((v, i) => `a * ${v}^2 + b * ${v} + c = ${y[i]}`).join('\n'));
 
 console.log("Solve for a,b,c")
 
