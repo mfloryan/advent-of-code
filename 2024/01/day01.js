@@ -8,18 +8,10 @@ numbers = input.split("\n").map(l => l.split("  ").map(v => parseInt(v)))
 let list1 = numbers.map(n => n[0]).toSorted((a, b) => a - b)
 let list2 = numbers.map(n => n[1]).toSorted((a, b) => a - b)
 
-let diff = 0;
-
-for (let i = 0; i < list1.length; i++) {
-    diff += Math.abs(list1[i] - list2[i])
-}
+let diff = list1.reduce((p, c, i) => p + Math.abs(c - list2[i]), 0);
 
 console.log(diff)
 
-let similarity = 0;
-
-for (let i = 0; i < list1.length; i++) {
-    similarity += (list1[i] * list2.filter(n => n == list1[i]).length)
-}
+let similarity = list1.reduce((p, c, i) => p + (c * list2.filter(n => n == c).length), 0);
 
 console.log(similarity)
