@@ -37,6 +37,23 @@ function countSizes(line) {
     return charCount
 }
 
+function encodeAgain(line) {
+    let newString = ""
+    for (const char of line) {
+        if (char == '"') {
+            newString += '\\"'
+        } else if (char == '\\') {
+            newString += '\\\\'
+        } else {
+            newString += char   
+        }
+    }
+    return newString.length
+}
+
 let stringCode = lines.reduce((p,c) => p+2+c.length,0)
 let memoryCharacters = lines.reduce((p,c) => p+countSizes(c),0)
 console.log(stringCode-memoryCharacters)
+
+let newStringCode = lines.reduce((p,c) => p + 6 + encodeAgain(c), 0)
+console.log(newStringCode - stringCode)
