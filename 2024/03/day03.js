@@ -34,7 +34,7 @@ function execute(instructions) {
 }
 
 let instructions = findInstructions(input)
-console.log(instructions.reduce((p, c) => p + (c.a * c.b), 0))
+console.log(execute(instructions))
 
 let i2 = findInstructions2(input)
 console.log(execute(i2))
