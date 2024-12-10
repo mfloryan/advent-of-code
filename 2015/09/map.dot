@@ -1,0 +1,30 @@
+graph TravelMap {
+    Tristram -- AlphaCentauri [label=34];
+    Tristram -- Snowdin [label=100];
+    Tristram -- Tambi [label=63];
+    Tristram -- Faerun [label=108];
+    Tristram -- Norrath [label=111];
+    Tristram -- Straylight [label=89];
+    Tristram -- Arbre [label=132];
+    AlphaCentauri -- Snowdin [label=4];
+    AlphaCentauri -- Tambi [label=79];
+    AlphaCentauri -- Faerun [label=44];
+    AlphaCentauri -- Norrath [label=147];
+    AlphaCentauri -- Straylight [label=133];
+    AlphaCentauri -- Arbre [label=74];
+    Snowdin -- Tambi [label=105];
+    Snowdin -- Faerun [label=95];
+    Snowdin -- Norrath [label=48];
+    Snowdin -- Straylight [label=88];
+    Snowdin -- Arbre [label=7];
+    Tambi -- Faerun [label=68];
+    Tambi -- Norrath [label=134];
+    Tambi -- Straylight [label=107];
+    Tambi -- Arbre [label=40];
+    Faerun -- Norrath [label=11];
+    Faerun -- Straylight [label=66];
+    Faerun -- Arbre [label=144];
+    Norrath -- Straylight [label=115];
+    Norrath -- Arbre [label=135];
+    Straylight -- Arbre [label=127];
+}
