@@ -37,13 +37,13 @@ function addPoints(a, b) {
 
 function expandRegion(start, map, bounds) {
     let visited = new Set()
-    let area = []
+    let region = []
     let queue = []
     queue.push(start)
     while (queue.length > 0) {
         let current = queue.shift()
         if (visited.has(`${current.x}:${current.y}`)) continue
-        area.push(current)
+        region.push(current)
         visited.add(`${current.x}:${current.y}`)
 
         let nextSteps = Object.values(directions)
@@ -55,20 +55,20 @@ function expandRegion(start, map, bounds) {
         queue.push(...nextSteps)
     }
 
-    return area
+    return region
 }
 
 function getAllRegions(listMap, map, bounds) {
     let availablePoints = [...listMap]
-    let areas = []
+    let regions = []
 
     while (availablePoints.length > 0) {
-        let area = expandRegion(availablePoints[0], map, bounds)
-        areas.push(area)
-        availablePoints = availablePoints.filter(p => !area.some(ap => p.x == ap.x && p.y == ap.y))
+        let region = expandRegion(availablePoints[0], map, bounds)
+        regions.push(region)
+        availablePoints = availablePoints.filter(p => !region.some(ap => p.x == ap.x && p.y == ap.y))
     }
 
-    return areas
+    return regions
 }
 
 function calculateFencePrice(region) {
@@ -96,7 +96,7 @@ function printRegion(region) {
     for (let y = dim[2]; y <= dim[3]; y++) {
         let line = []
         for (let x = dim[0]; x <= dim[1]; x++) {
-            
+
 
             if (region.some(p => p.x == x && p.y == y)) {
                 line.push(region[0].c)
@@ -109,7 +109,7 @@ function printRegion(region) {
     console.log(regionPic.join('\n'))
 }
 
-function calculateFencePrice2(region) {
+function calculateDiscountedPrice(region) {
 
     let externalPoints = []
     for (const point of region) {
@@ -159,7 +159,8 @@ function evaluate(input) {
 
     let regions = getAllRegions(map, map2, bounds)
     return [regions.map(r => calculateFencePrice(r)).reduce((p, c) => p + c),
-    regions.map(r => calculateFencePrice2(r)).reduce((p, c) => p + c)]
+    regions.map(r => calculateDiscountedPrice
+        (r)).reduce((p, c) => p + c)]
 }
 
 
@@ -208,9 +209,3 @@ MIIISIJEEE
 MMMISSJEEE`
 
 assert.deepEqual(evaluate(input), [1930, 1206])
-
-// console.log(regions.map(r => {return {r:r[0].c, price: calculateFencePrice2(r)}}).map(r => `${r.r} => ${r.price}`).join('\n'))
-
-// NOT 830928
-// NOT 830722
-// NOT 830619
