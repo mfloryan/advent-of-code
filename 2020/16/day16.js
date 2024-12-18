@@ -24,32 +24,34 @@ function getInvalidValues(ticket, fields) {
     ))
 }
 
-console.log(
-    tickets.flatMap(t => getInvalidValues(t, fields)).reduce((p, c) => p + c)
-)
-
-let validTickets = tickets.filter(t => getInvalidValues(t, fields).length == 0)
-
-let sum = (a, b) => {
+let addArrays = (a, b) => {
     if (a.length != b.length) throw "Can't sum"
     return (a.map((v, i) => v + b[i]))
 }
 
-function matchFields(fields, validTickets) {
+const multiply = (a, b) => a * b
+const add = (a, b) => a + b
+
+console.log(
+    tickets.flatMap(t => getInvalidValues(t, fields)).reduce(add)
+)
+
+let validTickets = tickets.filter(t => getInvalidValues(t, fields).length == 0)
+
+function matchFields(fields, sampleData, fieldValidation) {
     let allFields = [...fields]
     let matchedFileds = {}
 
     do {
         for (const f of allFields) {
             let ignorePosition = Object.keys(matchedFileds).map(Number)
-            let x = validTickets.map(
-                ticket => ticket
-                .map((v, i) =>
-                        (!ignorePosition.includes(i)
-                         && f.rules.some(r => v >= r[0] && v <= r[1])) ? 1 : 0)
-            ).reduce((p, c) => sum(p, c))
-            if (x.filter(v => v == validTickets.length).length == 1) {
-                matchedFileds[x.indexOf(validTickets.length)] = f
+            let x = sampleData.map(
+                ticket => ticket.map((v, i) =>
+                    (!ignorePosition.includes(i)
+                        && fieldValidation(f, v)) ? 1 : 0)
+            ).reduce(addArrays)
+            if (x.filter(v => v == sampleData.length).length == 1) {
+                matchedFileds[x.indexOf(sampleData.length)] = f
                 allFields.splice(allFields.indexOf(f), 1)
                 break;
             }
@@ -61,8 +63,8 @@ function matchFields(fields, validTickets) {
 }
 
 
-let orderedFields = matchFields(fields, validTickets)
+let orderedFields = matchFields(fields, validTickets, (f, v) => f.rules.some(r => v >= r[0] && v <= r[1]))
 let interestingFields = Object.keys(orderedFields).filter(k => orderedFields[k].name.startsWith("departure")).map(Number)
 console.log(
-    interestingFields.map(i => ticket[i]).reduce((p, c) => p * c)
+    interestingFields.map(i => ticket[i]).reduce(multiply)
 )
