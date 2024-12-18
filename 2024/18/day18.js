@@ -50,19 +50,17 @@ function walkMaze(maze, start, end) {
 
 let data = input.split('\n').map(l => l.split(',').map(Number))
 let memory = new Array(71).fill(0).map(a => new Array(71).fill('.'))
+let dataFeed = [...data]
+let byte
 
 for (let i = 0; i < 1024; i++) {
-    let m = data[i]
-    memory[m[1]][m[0]] = '#'
+    byte = dataFeed.shift()
+    memory[byte[1]][byte[0]] = '#'
 }
 
 let mazePath = walkMaze(memory, [0, 0], [70, 70])
 console.log(mazePath.length - 1)
 
-memory = new Array(71).fill(0).map(a => new Array(71).fill('.'))
-
-let dataFeed = [...data]
-let byte
 do {
     byte = dataFeed.shift()
     memory[byte[1]][byte[0]] = '#'
