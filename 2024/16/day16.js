@@ -20,9 +20,9 @@ function addPoints(a, b) {
 }
 
 const directions = {
-    'E': { m: { x: 1, y: 0 },  l: 'N', r: 'S' },
+    'E': { m: { x: 1, y: 0 }, l: 'N', r: 'S' },
     'W': { m: { x: -1, y: 0 }, l: 'S', r: 'N' },
-    'S': { m: { x: 0, y: 1 },  l: 'E', r: 'W' },
+    'S': { m: { x: 0, y: 1 }, l: 'E', r: 'W' },
     'N': { m: { x: 0, y: -1 }, l: 'W', r: 'E' },
 }
 
@@ -33,7 +33,7 @@ function exploreMaze(maze, point, dir, end, scores, globalScores, score = 0, vis
     globalScores[point.y][point.x] = Math.min(score, globalScores[point.y][point.x])
 
     if (samePoint(point, end)) {
-        paths.push({score, seats: visited})
+        paths.push({ score, seats: visited })
         scores.push(score)
         return
     }
@@ -55,14 +55,14 @@ function exploreMaze(maze, point, dir, end, scores, globalScores, score = 0, vis
 function solveMaze(maze, start, end) {
     let scores = []
     let globalScores = new Array(maze.length)
-    for (let i=0; i< maze.length; i++) {
+    for (let i = 0; i < maze.length; i++) {
         globalScores[i] = new Array(maze[i].length).fill(Infinity)
     }
     exploreMaze(maze, start, 'E', end, scores, globalScores)
-    let minScore = scores.toSorted((a,b) => a-b)[0]
+    let minScore = scores.toSorted((a, b) => a - b)[0]
 
     let minPaths = paths.filter(p => p.score == minScore)
-    let seats = minPaths.map(p => p.seats).reduce((p,c) => p.union(c))
+    let seats = minPaths.map(p => p.seats).reduce((p, c) => p.union(c))
     return [minScore, seats.size]
 }
 
