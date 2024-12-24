@@ -37,23 +37,20 @@ const operations = {
     'XOR': (a, b) => a ^ b,
 }
 
-function calculateValue(wire, wires, values, usedWires = []) {
-    // console.log(wire, usedWires, usedWires.includes(wire))
-    if (usedWires.includes(wire)) {
-        throw "There is a loop with wire " + wire
-    }
+function calculateValue(wire, wires, values, depth = 0) {
+    if (depth > 60) throw "There is a loop in the graph"
     let prev = wires.find(v => v[3] == wire)
 
     let setup = { l: prev[0], r: prev[2], g: prev[1] }
 
     if (!setup.l.startsWith('x') && !setup.l.startsWith('y')) {
-        setup.l = calculateValue(setup.l, wires, values, [wire, ...usedWires])
+        setup.l = calculateValue(setup.l, wires, values, depth++)
     } else {
         setup.l = values.get(setup.l)
     }
 
     if (!setup.r.startsWith('x') && !setup.r.startsWith('y')) {
-        setup.r = calculateValue(setup.r, wires, values, [wire, ...usedWires])
+        setup.r = calculateValue(setup.r, wires, values, depth++)
     } else {
         setup.r = values.get(setup.r)
     }
@@ -61,10 +58,59 @@ function calculateValue(wire, wires, values, usedWires = []) {
     return operations[setup.g](setup.l, setup.r)
 }
 
+function printFunction(wire, wires, depth = 0) {
+    if (depth > 2) return '...'
+    let connection = wires.find(v => v[3] == wire)
+
+    let setup = { l: connection[0], r: connection[2], g: connection[1] }
+
+    let ret = `${wire} = `
+
+    let left
+    if (!setup.l.startsWith('x') && !setup.l.startsWith('y')) {
+        left = '(' + printFunction(setup.l, wires, depth + 1) + ')'
+    } else {
+        left = setup.l
+    }
+
+    let right
+    if (!setup.r.startsWith('x') && !setup.r.startsWith('y')) {
+        right = '(' + printFunction(setup.r, wires, depth + 1) + ')'
+    } else {
+        right = setup.r
+    }
+
+    if (left.length > right.length) {
+        ret += `${right} ${setup.g} ${left}`
+    } else {
+        ret += `${left} ${setup.g} ${right}`
+    }
+
+    return ret
+}
+
 function getFullOutput(code, outputBits, values) {
     return outputBits.map(o => calculateValue(o, code, values))
 }
 
+function printDot(wires) {
+    console.log('digraph {')
+    for (const w of wires) {
+        let color = w[1] == 'AND'?'green4':w[1]=='OR'?'purple':'black'
+        console.log(` ${w[0]} -> ${w[3]} [color=\"${color}\"];`)
+        console.log(` ${w[2]} -> ${w[3]} [color=\"${color}\"];`)
+        console.log(`${w[3]} [color=\"${color}\",fontcolor=\"${color}\"]`)
+    }
+    for (const o of wires.filter(w => w[3].startsWith('z')).map(w => w[3])) {
+        console.log(`${o} [style=filled,color=darkolivegreen1]`)
+    }
+    let inputs = [...new Set(wires.flatMap(w => [w[0], w[2]]))].filter(v => v.startsWith('x') || v.startsWith('y'))
+    for (const i of inputs) {
+        console.log(`${i} [style=filled,color=khaki1]`)
+    }
+    console.log('}')
+
+}
 
 function populateValues(x, y) {
     let values = new Map()
@@ -77,7 +123,6 @@ function populateValues(x, y) {
     return values
 }
 
-
 function testEveryBit(code, outputBits) {
     let correctBits = []
     for (let b = 0; b < 45; b++) {
@@ -87,17 +132,11 @@ function testEveryBit(code, outputBits) {
         let v = populateValues(x, y)
         let z = getFullOutput(code, outputBits, v).join('')
 
-        if (z.split('').toReversed()[b] =='1') {
+        if (z.split('').toReversed()[b] == '1') {
             correctBits.push(b)
-        } else {
-            // console.log(b)
         }
-        // console.log(' x:',x.split('').toReversed().join(''))
-        // console.log(' y:',y.split('').toReversed().join(''))
-        // console.log('z:', z.split('').toReversed().join(''))
-        // console.log()
+
     }
-    // console.log(correctBits)
     return correctBits
 }
 
@@ -105,10 +144,16 @@ function testEveryBit(code, outputBits) {
 let [data, code] = parseInput(input)
 const outputBits = code.map(c => c[3]).filter(v => v.startsWith('z')).sort()
 
-let valueCodes = getFullOutput(code, outputBits, data)
-console.log(parseInt(valueCodes.toReversed().join(''),2))
+// node day24.js | dot -Tpng >day24.png
+// printDot(code)
+// return
 
-console.log(testEveryBit(code, outputBits).length == 45)
+let valueCodes = getFullOutput(code, outputBits, data)
+console.log(parseInt(valueCodes.toReversed().join(''), 2))
+
+console.log(
+    outputBits.map(b => printFunction(b, code)).join('\n')
+)
 
 let swap = [
     ["z14", "vss"],
@@ -123,6 +168,14 @@ for (const sw of swap) {
     s1[3] = sw[1]
     s2[3] = sw[0]
 }
+
+console.log("")
+console.log("AFTER THE FIX")
+
+console.log(
+    outputBits.map(b => printFunction(b, code)).join('\n')
+)
+
 
 console.log(testEveryBit(code, outputBits).length == 45)
 
