@@ -1,2 +1,5 @@
 .vscode/
 .DS_Store
+
+#As per Eric's request not to include any part of AoC copy
+input.txt
