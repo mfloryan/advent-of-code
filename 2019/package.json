@@ -20,7 +20,7 @@
   },
   "homepage": "https://github.com/mfloryan/aoc2018#readme",
   "dependencies": {
-    "lodash": "^4.17.19"
+    "lodash": "^4.17.23"
   },
   "devDependencies": {
     "eslint": "^8.3.0",
